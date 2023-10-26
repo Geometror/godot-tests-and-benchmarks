@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://c3u41s0uoob37"]
+
+[ext_resource type="Script" path="res://particles_auto_benchmark.gd" id="1_n1pc0"]
+[ext_resource type="QuadMesh" uid="uid://bjlt54w5a38rt" path="res://particle_mesh_including_material.tres" id="2_nss6l"]
+[ext_resource type="Material" uid="uid://cr6oey0dk7kjg" path="res://particle_process_material.tres" id="2_pv6r7"]
+
+[sub_resource type="Environment" id="Environment_udeu1"]
+background_mode = 2
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="main" type="Node3D" node_paths=PackedStringArray("cpu_particles_node")]
+script = ExtResource("1_n1pc0")
+particle_amount_per_system = 2048
+particle_systems = 40
+time_per_bechmark_in_seconds = 5
+particle_process_material = ExtResource("2_pv6r7")
+cpu_particles_node = NodePath("cpu_particles_template")
+particle_mesh = ExtResource("2_nss6l")
+
+[node name="cpu_particles_template" type="CPUParticles3D" parent="."]
+visible = false
+mesh = ExtResource("2_nss6l")
+spread = 180.0
+initial_velocity_max = 2.0
+
+[node name="camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+
+[node name="timer" type="Timer" parent="."]
+wait_time = 0.5
+
+[node name="sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0.495485, -0.676182, 0.545228, -0.067045, 0.596052, 0.800142, 0, 0, 0)
+
+[node name="world_env" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_udeu1")
+
+[node name="particle_container" type="Node3D" parent="."]

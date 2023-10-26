@@ -1,0 +1,5 @@
+[gd_resource type="ParticleProcessMaterial" format=3 uid="uid://cr6oey0dk7kjg"]
+
+[resource]
+spread = 180.0
+initial_velocity_max = 2.0
