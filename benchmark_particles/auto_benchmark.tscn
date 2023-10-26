@@ -1,8 +1,34 @@
-[gd_scene load_steps=5 format=3 uid="uid://c3u41s0uoob37"]
+[gd_scene load_steps=11 format=3 uid="uid://c3u41s0uoob37"]
 
 [ext_resource type="Script" path="res://particles_auto_benchmark.gd" id="1_n1pc0"]
 [ext_resource type="QuadMesh" uid="uid://bjlt54w5a38rt" path="res://particle_mesh_including_material.tres" id="2_nss6l"]
 [ext_resource type="Material" uid="uid://cr6oey0dk7kjg" path="res://particle_process_material.tres" id="2_pv6r7"]
+[ext_resource type="Script" path="res://BenchmarkParams.gd" id="4_p2h0y"]
+
+[sub_resource type="Resource" id="Resource_fxno7"]
+script = ExtResource("4_p2h0y")
+particle_amount_per_system = 8
+particle_systems = 320
+
+[sub_resource type="Resource" id="Resource_f6q6e"]
+script = ExtResource("4_p2h0y")
+particle_amount_per_system = 16
+particle_systems = 320
+
+[sub_resource type="Resource" id="Resource_q43uf"]
+script = ExtResource("4_p2h0y")
+particle_amount_per_system = 32
+particle_systems = 320
+
+[sub_resource type="Resource" id="Resource_domrj"]
+script = ExtResource("4_p2h0y")
+particle_amount_per_system = 128
+particle_systems = 80
+
+[sub_resource type="Resource" id="Resource_mni5j"]
+script = ExtResource("4_p2h0y")
+particle_amount_per_system = 512
+particle_systems = 20
 
 [sub_resource type="Environment" id="Environment_udeu1"]
 background_mode = 2
@@ -11,15 +37,13 @@ glow_enabled = true
 
 [node name="main" type="Node3D" node_paths=PackedStringArray("cpu_particles_node")]
 script = ExtResource("1_n1pc0")
-particle_amount_per_system = 2048
-particle_systems = 40
-time_per_bechmark_in_seconds = 5
+time_per_bechmark_in_seconds = 30
 particle_process_material = ExtResource("2_pv6r7")
 cpu_particles_node = NodePath("cpu_particles_template")
 particle_mesh = ExtResource("2_nss6l")
+benchmark_sets = Array[ExtResource("4_p2h0y")]([SubResource("Resource_fxno7"), SubResource("Resource_f6q6e"), SubResource("Resource_q43uf"), SubResource("Resource_domrj"), SubResource("Resource_mni5j")])
 
 [node name="cpu_particles_template" type="CPUParticles3D" parent="."]
-visible = false
 mesh = ExtResource("2_nss6l")
 spread = 180.0
 initial_velocity_max = 2.0

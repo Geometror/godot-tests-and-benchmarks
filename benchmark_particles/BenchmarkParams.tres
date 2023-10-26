@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="BenchmarkParams" load_steps=2 format=3 uid="uid://dexlxvpfubdwy"]
+
+[ext_resource type="Script" path="res://BenchmarkParams.gd" id="1_gmdso"]
+
+[resource]
+script = ExtResource("1_gmdso")
+particle_amount_per_system = 0
+particle_systems = 0

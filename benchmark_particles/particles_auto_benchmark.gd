@@ -1,13 +1,12 @@
 extends Node3D
 
 @export var print_measurements : bool = true
-@export var particle_amount_per_system = 8
-@export var particle_systems = 160
 @export var warmup_in_seconds = 3
 @export var time_per_bechmark_in_seconds = 10
 @export var particle_process_material : ParticleProcessMaterial
 @export var cpu_particles_node : CPUParticles3D
 @export var particle_mesh : Mesh
+@export var benchmark_sets : Array[BenchmarkParams]
 
 @onready var particle_container = $particle_container
 @onready var timer = $timer
@@ -24,17 +23,25 @@ func _ready():
 	print("Starting benchmarks.")
 
 	# Execute benchmarks
-	await benchmark(bench_cpu_particles)
-	await benchmark(bench_gpu_particles.bind(1))
-	await benchmark(bench_gpu_particles.bind(10))
-	await benchmark(bench_gpu_particles.bind(particle_systems))
-
+	for benchmark_set : BenchmarkParams in benchmark_sets:
+		benchmark_results.append(
+			"🟩 Results (particle systems: %s, particles per system: %s):" % 
+			[benchmark_set.particle_systems, benchmark_set.particle_amount_per_system])
+		
+		await benchmark(bench_cpu_particles.bind(benchmark_set.particle_systems, benchmark_set.particle_amount_per_system))
+		await benchmark(bench_gpu_particles.bind(benchmark_set.particle_systems, benchmark_set.particle_amount_per_system, 1))
+		await benchmark(bench_gpu_particles.bind(benchmark_set.particle_systems, benchmark_set.particle_amount_per_system, 10))
+		await benchmark(bench_gpu_particles.bind(benchmark_set.particle_systems, benchmark_set.particle_amount_per_system, benchmark_set.particle_systems))
+		
+		benchmark_results.append("")
 	print_results()
-	#get_tree().quit()
+	
+	# Necessary since there is no way to manually flush the print buffer
+	await get_tree().create_timer(0.5)
+	get_tree().quit()
 
 func print_results():
 	print("-------------------------------------------------------------")
-	print("🟩 Results (particle systems: %s, particles per system: %s):" % [particle_systems, particle_amount_per_system])
 	for result in benchmark_results:
 		print(result)
 	print("-------------------------------------------------------------")
@@ -61,7 +68,7 @@ func end_mspf_measurement():
 	print("Benchmark " + current_benchmark + " finished")
 	var avg_mspf = mspf_sum as float / mspf_probe_count
 	print("Average mspf: %s " % avg_mspf)
-	benchmark_results.append("%s : %.4f" % [current_benchmark, avg_mspf])
+	benchmark_results.append("%s : %.4f mspf" % [current_benchmark, avg_mspf])
 
 	timer.stop()
 	mspf_sum = 0
@@ -75,7 +82,7 @@ func measure_mspf():
 
 	var avg_mspf = mspf_sum as float / mspf_probe_count
 	if print_measurements:
-		print("mspf > AVG: %.4f, CURRENT: %.4f" % [avg_mspf, current_mspf])
+		print("mspf > AVG: %.4f mspf, CURRENT: %.4f mspf" % [avg_mspf, current_mspf])
 
 func clear_particle_container():
 	for child in particle_container.get_children():
@@ -83,7 +90,7 @@ func clear_particle_container():
 
 # Benchmarks
 
-func bench_cpu_particles():
+func bench_cpu_particles(particle_systems: int, particle_amount_per_system: int):
 	for i in range(particle_systems):
 		var particles : CPUParticles3D = cpu_particles_node.duplicate()
 		particles.visible = true
@@ -93,7 +100,7 @@ func bench_cpu_particles():
 	
 	start_mspf_measurement("CPU Particles")
 
-func bench_gpu_particles(unique_particle_materials: int):
+func bench_gpu_particles(particle_systems: int, particle_amount_per_system: int, unique_particle_materials: int):
 	var process_materials : Array[ParticleProcessMaterial] = []
 
 	# Create particle materials
